@@ -1,6 +1,8 @@
 namespace RTLTMPro
 {
-    internal enum TashkeelCharacters
+    // Note that if you add to these characters, you also need to define
+    // characters inside Range file and TextMesh Pro font asset unicode range.
+    public enum TashkeelCharacters
     {
         Fathan = 0x064B,
         Dammatan = 0x064C,
@@ -12,8 +14,11 @@ namespace RTLTMPro
         Sukun = 0x0652,
         MaddahAbove = 0x0653,
         SuperscriptAlef = 0x670,
+        ShaddaWithDammatanIsolatedForm = 0xFC5E,
+        ShaddaWithKasratanIsolatedForm = 0xFC5F,
         ShaddaWithFathaIsolatedForm = 0xFC60,
         ShaddaWithDammaIsolatedForm = 0xFC61,
-        ShaddaWithKasraIsolatedForm = 0xFC61
+        ShaddaWithKasraIsolatedForm = 0xFC62,
+        ShaddaWithSuperscriptAlefIsolatedForm = 0xFC63
     }
 }
