@@ -5,18 +5,14 @@ using UnityEngine;
 namespace RTLTMPro
 {
     [CustomEditor(typeof(RTLTextMeshPro3D)), CanEditMultipleObjects]
-    public class RTLTextMeshPro3DEditor : TMP_UiEditorPanel
+    public class RTLTextMeshPro3DEditor : TMP_EditorPanel
     {
         private SerializedProperty originalTextProp;
-        private SerializedProperty havePropertiesChangedProp;
-        private SerializedProperty inputSourceProp;
-        private SerializedProperty isInputPasingRequiredProp;
         private SerializedProperty preserveNumbersProp;
         private SerializedProperty farsiProp;
         private SerializedProperty fixTagsProp;
         private SerializedProperty forceFixProp;
 
-        private bool changed;
         private bool foldout;
         private RTLTextMeshPro3D tmpro;
 
@@ -29,9 +25,6 @@ namespace RTLTMPro
             fixTagsProp = serializedObject.FindProperty("fixTags");
             forceFixProp = serializedObject.FindProperty("forceFix");
             originalTextProp = serializedObject.FindProperty("originalText");
-            havePropertiesChangedProp = serializedObject.FindProperty("m_havePropertiesChanged");
-            inputSourceProp = serializedObject.FindProperty("m_inputSource");
-            isInputPasingRequiredProp = serializedObject.FindProperty("m_isInputParsingRequired");
         }
 
         public override void OnInspectorGUI()
@@ -46,13 +39,6 @@ namespace RTLTMPro
             ListenForZeroWidthNoJoiner();
 
             if (EditorGUI.EndChangeCheck())
-            {
-                inputSourceProp.enumValueIndex = 0;
-                isInputPasingRequiredProp.boolValue = true;
-                changed = true;
-            }
-
-            if (changed)
                 OnChanged();
 
             serializedObject.ApplyModifiedProperties();
@@ -65,23 +51,24 @@ namespace RTLTMPro
                 DrawOptions();
 
                 if (GUILayout.Button("Re-Fix"))
-                    changed = true;
+                    m_HavePropertiesChanged = true;
 
                 if (EditorGUI.EndChangeCheck())
-                {
-                    changed = true;
-                }
+                    m_HavePropertiesChanged = true;
             }
 
-            if(changed)
+            if (m_HavePropertiesChanged)
                 OnChanged();
+
+            serializedObject.ApplyModifiedProperties();
         }
 
         protected void OnChanged()
         {
             tmpro.UpdateText();
-            havePropertiesChangedProp.boolValue = true;
-            changed = false;
+            m_HavePropertiesChanged = false;
+            m_TextComponent.havePropertiesChanged = true;
+            m_TextComponent.ComputeMarginSize();
             EditorUtility.SetDirty(target);
         }
 

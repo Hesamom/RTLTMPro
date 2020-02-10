@@ -1,6 +1,6 @@
 ﻿//#define RTL_OVERRIDE
 
-using System.Linq;
+using System.Text;
 using TMPro;
 using UnityEngine;
 
@@ -28,7 +28,12 @@ namespace RTLTMPro
             }
         }
 
-        public virtual bool PreserveNumbers
+        public string OriginalText
+        {
+            get { return originalText; }
+        }
+
+        public bool PreserveNumbers
         {
             get { return preserveNumbers; }
             set
@@ -80,52 +85,32 @@ namespace RTLTMPro
             }
         }
 
-        [SerializeField]
-        protected bool preserveNumbers;
+        [SerializeField] protected bool preserveNumbers;
 
-        [SerializeField]
-        protected bool farsi = true;
+        [SerializeField] protected bool farsi = true;
 
-        [SerializeField]
-        [TextArea(3, 10)]
-        protected string originalText;
+        [SerializeField] [TextArea(3, 10)] protected string originalText;
 
-        [SerializeField]
-        protected bool fixTags = true;
+        [SerializeField] protected bool fixTags = true;
 
-        [SerializeField]
-        protected bool forceFix;
+        [SerializeField] protected bool forceFix;
 
-        protected RTLSupport support;
+        protected readonly FastStringBuilder finalText = new FastStringBuilder(RTLSupport.DefaultBufferSize);
 
-        protected override void Awake()
-        {
-            base.Awake();
-            support = new RTLSupport();
-            UpdateSupport();
-        }
-
-        protected virtual void Update()
+        protected void Update()
         {
             if (havePropertiesChanged)
             {
-                if (support == null)
-                    support = new RTLSupport();
-
-                UpdateSupport();
                 UpdateText();
             }
         }
 
-        public virtual void UpdateText()
+        public void UpdateText()
         {
-            if (support == null)
-                support = new RTLSupport();
-
             if (originalText == null)
                 originalText = "";
 
-            if (ForceFix == false && support.IsRTLInput(originalText) == false)
+            if (ForceFix == false && TextUtils.IsRTLInput(originalText) == false)
             {
                 isRightToLeftText = false;
                 base.text = originalText;
@@ -139,28 +124,16 @@ namespace RTLTMPro
             havePropertiesChanged = true;
         }
 
-        protected virtual void UpdateSupport()
-        {
-            if (support == null)
-                support = new RTLSupport();
-
-            support.Farsi = farsi;
-            support.PreserveNumbers = preserveNumbers;
-            support.FixTextTags = fixTags;
-        }
-
-        public virtual string GetFixedText(string input)
+        private string GetFixedText(string input)
         {
             if (string.IsNullOrEmpty(input))
                 return input;
 
-            if (support == null)
-                support = new RTLSupport();
+            finalText.Clear();
+            RTLSupport.FixRTL(input, finalText, farsi, fixTags, preserveNumbers);
+            finalText.Reverse();
 
-            input = support.FixRTL(input);
-            input = input.Reverse().ToArray().ArrayToString();
-
-            return input;
+            return finalText.ToString();
         }
     }
 }
